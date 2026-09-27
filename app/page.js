@@ -1,14 +1,27 @@
-import ClientDemo from "../components/ClientDemo.js"
-import RSCDemo from "../components/RSCdemo.js"
-import DataFetchingDemo from "@/components/DataFetchingDemo.js"
-import ServerActionsDemo from "@/components/ServerActionsDemo.js"
+import fs from 'node:fs/promises';
 
-export default function Home() {
+import { Suspense } from 'react';
+
+import UsePromiseDemo from '@/components/UsePromiseDemo';
+import ErrorBoundary from "@/components/ErrorBoundary.js"
+
+export default async function Home() {
+  const fetchUsersPromise = new Promise((resolve, reject) =>
+    setTimeout(async () => {
+      const data = await fs.readFile('dummy-db.json', 'utf-8');
+      const users = JSON.parse(data);
+      //resolve(users);
+      reject(new Error("Error"))
+    }, 2000)
+  );
+
   return (
     <main>
-      <p>Let's go!</p>
-      <DataFetchingDemo />
-      <ServerActionsDemo />
+      <ErrorBoundary fallback={<p>Something went wrong!</p>}>
+        <Suspense fallback={<p>Loading users...</p>}>
+          <UsePromiseDemo usersPromise={fetchUsersPromise} />
+        </Suspense>
+      </ErrorBoundary>
     </main>
   );
 }
